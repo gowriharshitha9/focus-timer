@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Day 6 | Focus Timer</title>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card: #18181b;
+      --accent: #9b8ec4;
+      --accent-light: #dcd6f0;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: radial-gradient(#27272a 1px, transparent 1px);
+      background-size: 20px 20px;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .container {
+      background: var(--card);
+      border: 2px solid var(--accent);
+      box-shadow: 6px 6px 0px var(--accent);
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      color: var(--accent-light);
+      letter-spacing: 2px;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+    }
+
+    .modes {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: 1px solid var(--muted);
+      color: var(--muted);
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.15s ease;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+      font-weight: bold;
+    }
+
+    .timer-display {
+      font-size: 4.2rem;
+      font-weight: bold;
+      color: var(--text);
+      margin: 1rem 0 2rem;
+      letter-spacing: 3px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 3px 3px 0px var(--accent-light);
+      transition: transform 0.1s ease;
+    }
+
+    .btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px var(--accent-light);
+    }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--accent-light);
+      border: 1px solid var(--accent-light);
+      box-shadow: none;
+    }
+
+    .status {
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Day 06 // Focus Timer</h1>
+    
+    <div class="modes">
+      <button class="mode-btn active" data-time="25">Focus (25m)</button>
+      <button class="mode-btn" data-time="5">Short (5m)</button>
+      <button class="mode-btn" data-time="15">Long (15m)</button>
+    </div>
+
+    <div class="timer-display" id="display">25:00</div>
+
+    <div class="controls">
+      <button class="btn" id="startBtn">START</button>
+      <button class="btn secondary" id="resetBtn">RESET</button>
+    </div>
+
+    <div class="status" id="status">Sessions completed: 0</div>
+  </div>
+
+  <script>
+    let defaultMinutes = 25;
+    let timeLeft = defaultMinutes * 60;
+    let timerId = null;
+    let sessions = 0;
+
+    const display = document.getElementById('display');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusText = document.getElementById('status');
+    const modeBtns = document.querySelectorAll('.mode-btn');
+
+    function updateDisplay() {
+      const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const secs = (timeLeft % 60).toString().padStart(2, '0');
+      display.textContent = `${mins}:${secs}`;
+      document.title = `${mins}:${secs} - Focus Timer`;
+    }
+
+    function toggleTimer() {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+        startBtn.textContent = 'START';
+      } else {
+        startBtn.textContent = 'PAUSE';
+        timerId = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateDisplay();
+          } else {
+            clearInterval(timerId);
+            timerId = null;
+            startBtn.textContent = 'START';
+            if (defaultMinutes === 25) {
+              sessions++;
+              statusText.textContent = `Sessions completed: ${sessions}`;
+            }
+            alert('Time is up!');
+          }
+        }, 1000);
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerId);
+      timerId = null;
+      startBtn.textContent = 'START';
+      timeLeft = defaultMinutes * 60;
+      updateDisplay();
+    }
+
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        defaultMinutes = parseInt(btn.dataset.time, 10);
+        resetTimer();
+      });
+    });
+
+    startBtn.addEventListener('click', toggleTimer);
+    resetBtn.addEventListener('click', resetTimer);
+  </script>
+</body>
+</html>
